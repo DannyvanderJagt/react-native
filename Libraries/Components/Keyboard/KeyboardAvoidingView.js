@@ -85,6 +85,7 @@ const KeyboardAvoidingView = React.createClass({
 
   subscriptions: ([]: Array<EmitterSubscription>),
   frame: (null: ?Rect),
+  firstFrame: (null: ?Rect),
 
   relativeKeyboardHeight(keyboardFrame: ScreenRect): number {
     const frame = this.frame;
@@ -122,6 +123,9 @@ const KeyboardAvoidingView = React.createClass({
   },
 
   onLayout(event: LayoutEvent) {
+    if(!this.firstFrame){
+      this.firstFrame = event.nativeEvent.layout;
+    }
     this.frame = event.nativeEvent.layout;
   },
 
@@ -158,12 +162,12 @@ const KeyboardAvoidingView = React.createClass({
     switch (behavior) {
       case 'height':
         let heightStyle;
-        if (this.frame) {
+        if (this.firstFrame) {
           // Note that we only apply a height change when there is keyboard present,
           // i.e. this.state.bottom is greater than 0. If we remove that condition,
           // this.frame.height will never go back to its original value.
           // When height changes, we need to disable flex.
-          heightStyle = {height: this.frame.height - this.state.bottom, flex: 0};
+          heightStyle = {height: this.firstFrame.height - this.state.bottom, flex: 0};
         }
         return (
           <View ref={viewRef} style={[style, heightStyle]} onLayout={this.onLayout} {...props}>
